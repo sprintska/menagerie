@@ -77,8 +77,7 @@ def update_db(ships_obj,db_path):
 
     with closing(sqlite3.connect(db_path)) as conn:
         for ship in ships_obj:
-            for field_key in
-                        [
+            for field_key in [
                             "id",
                             "_rev",
                             "Name",
