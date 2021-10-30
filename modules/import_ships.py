@@ -74,7 +74,7 @@ def update_db(ships_obj,db_path):
 
     """Updates the db with the new ships."""
 
-    with closing(sqlite3.conntect(db_path)) as conn:
+    with closing(sqlite3.connect(db_path)) as conn:
         for ship in ships_obj:
             out = conn.execute('''INSERT INTO dropfleet_ships VALUES (
                 :_id,
