@@ -15,13 +15,10 @@ from discord import emoji
 from discord.ext import commands
 from fuzzywuzzy import fuzz
 
-_handler = logging.handlers.WatchedFileHandler("/var/log/shrimp.log")
+_handler = logging.handlers.WatchedFileHandler("/var/log/menagerie.log")
 logging.basicConfig(handlers=[_handler], level=logging.INFO)
 
-TOKEN_PATH = "/home/ardaedhel/bin/shrimpbot/privatekey.dsc"
-CARD_IMG_PATH = "/home/ardaedhel/bin/shrimpbot/img/"
-CARD_LOOKUP = "/home/ardaedhel/bin/shrimpbot/cards.txt"
-ACRO_LOOKUP = "/home/ardaedhel/bin/shrimpbot/acronyms.txt"
+TOKEN_PATH = os.path.join(os.getcwd(), "privatekey.dsc")
 BOT_OWNER_ID = 236683961831653376
 
 
@@ -32,20 +29,9 @@ enabled = True
 cheating = False  # Changes on login to default to False
 special_chars = "~`@#$%^&* ()_-+=|\\{}[]:;\"'<>,.?/!"
 
-cardlookup = {}
-with open(CARD_LOOKUP) as cardslist:
-    for line in cardslist.readlines():
-        filename, key = line.split(";")
-        cardlookup[key.rstrip()] = os.path.join(CARD_IMG_PATH, filename)
-
-acronym_dict = {}
-with open(ACRO_LOOKUP) as acros:
-    for line in acros.readlines():
-        acronym, definition = line.split(";")
-        acronym_dict[acronym.strip()] = definition.strip()
 
 bot = commands.Bot(command_prefix="&")
-note = discord.Game(name="'&' for definitions")
+note = discord.Game(name="'&help' for bot commands")
 
 
 def findIn(findMe, findInMe):
@@ -70,7 +56,8 @@ def searchFor(search_term, search_set, match_threshold=100):
     matches = sorted(
         [r for r in ratios], key=lambda ratio: ratio[1] + ratio[2], reverse=True
     )
-#    if ((int(matches[0][1] + matches[0][2])) > match_threshold) or (int(matches[0][0]) == 100):
+
+    # if ((int(matches[0][1] + matches[0][2])) > match_threshold) or (int(matches[0][0]) == 100):
     # logging.info(str(matches[0][1]),str(matches[0][2]))
     if ((int(matches[0][1] + matches[0][2])) > match_threshold) or (int(matches[0][1]) == 100):
         logging.info("FOUND MATCHES")
@@ -96,27 +83,39 @@ def searchFor(search_term, search_set, match_threshold=100):
     return False
 
 
-@bot.command()
-async def list():
-    """Lists every word the bot can explain."""
-    i = 0
-    msg = ""
-    for word in acronym_dict:
-        if i > 30:
-            await bot.say(msg)
-            i = 0
-            msg = ""
-        msg += "\n" + word.upper() + ": " + acronym_dict.get(word.upper(), "ERROR!")
-        i += 1
-    await bot.say(msg)
-    await bot.say("------------------")
-    await bot.say(str(len(acronym_dict)) + " words")
+@bot.event
+async def on_ready():
+
+    BOT_OWNER = bot.get_user(BOT_OWNER_ID)
+
+    logging.info("Logged in as")
+    logging.info(bot.user.name)
+    logging.info(bot.user.id)
+    logging.info("------")
+    logging.info("Owner is")
+    logging.info(BOT_OWNER.name)
+    logging.info(BOT_OWNER.id)
+    logging.info("------")
+    logging.info("Servers using Menagerie")
+    for guild in bot.guilds:
+        logging.info(" {}".format(str(guild)))
+        logging.info(" - ID: {}".format(str(guild.id)))
+        if guild.id == 697833083201650689:
+            await guild.leave()
+            logging.info(" [!] LEFT {}".format(str(guild)))
+        if guild.id != 669698762402299904: # Steel Strat Server are special snowflakes
+            await guild.me.edit(nick="Menagerie")
+    logging.info("======")
+
+    await bot.send_message(BOT_OWNER, "I LIIIIIIVE")
+
+    await bot.change_presence(status=discord.Status.online, activity=note)
 
 
 @bot.command()
 async def status():
     """Checks the status of the bot."""
-    await bot.say("Shrimpbot info:")
+    await bot.say("Menagerie info:")
     await bot.say("Bot name: " + bot.user.name)
     await bot.say("Bot ID: " + str(bot.user.id))
     if enabled:
@@ -137,35 +136,6 @@ async def toggle():
 
 
 @bot.event
-async def on_ready():
-
-    BOT_OWNER = bot.get_user(BOT_OWNER_ID)
-
-    logging.info("Logged in as")
-    logging.info(bot.user.name)
-    logging.info(bot.user.id)
-    logging.info("------")
-    logging.info("Owner is")
-    logging.info(BOT_OWNER.name)
-    logging.info(BOT_OWNER.id)
-    logging.info("------")
-    logging.info("Servers using Shrimpbot")
-    for guild in bot.guilds:
-        logging.info(" {}".format(str(guild)))
-        logging.info(" - ID: {}".format(str(guild.id)))
-        if guild.id == 697833083201650689:
-            await guild.leave()
-            logging.info(" [!] LEFT {}".format(str(guild)))
-        if guild.id != 669698762402299904: # Steel Strat Server are special snowflakes
-            await guild.me.edit(nick="Shrimpbot")
-    logging.info("======")
-
-    await bot.change_presence(status=discord.Status.online, activity=note)
-
-    # ~ await bot.edit_profile(username="ShrimpBot")
-
-
-@bot.event
 async def on_message(message):
     await bot.process_commands(message)
 
@@ -183,10 +153,7 @@ async def on_message(message):
         )
 
     # don't read our own message or do anything if not enabled
-    # ONLY the dice roller should respond to other bots
 
-    # if ((message.author.id == bot.user.id) and ("card" not in message.content)):
-    #     return
     if not enabled:
         return
 
