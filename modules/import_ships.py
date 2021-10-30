@@ -54,6 +54,7 @@ def create_db(db_path):
                 icons           text
             )''')
             conn.commit()
+            print(success)
     return success
 
 
@@ -112,3 +113,7 @@ def main(api_url,ship_db):
     ships = request_update(api_url)
 
     update_db(ships,ship_db)
+
+
+if __name__ == "__main__":
+    main(API_TARGET_URL,LOCAL_MIRROR_PATH)
