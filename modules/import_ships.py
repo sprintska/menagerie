@@ -77,6 +77,34 @@ def update_db(ships_obj,db_path):
 
     with closing(sqlite3.connect(db_path)) as conn:
         for ship in ships_obj:
+            for field_key in
+                        [
+                            "id",
+                            "_rev",
+                            "Name",
+                            "Faction",
+                            "Designation",
+                            "Scan",
+                            "Signal",
+                            "Thrust",
+                            "Hull",
+                            "Armour",
+                            "PointDefence",
+                            "GroupMin",
+                            "GroupMax",
+                            "Tonnage",
+                            "TonnageClass",
+                            "Points",
+                            "HardPoints",
+                            "Special",
+                            "Weapons",
+                            "LaunchAssets",
+                            "SpecRules",
+                            "MinHardPoints",
+                            "MaxBroadSides",
+                            "icons"]:
+                if field_key not in ship.keys:
+                    ship[field_key] = 0
             out = conn.execute('''INSERT INTO dropfleet_ships VALUES (
                 :_id,
                 :_rev,
