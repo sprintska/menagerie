@@ -14,7 +14,7 @@ from contextlib import closing
 _handler = logging.handlers.WatchedFileHandler("/var/log/menagerie.log")
 logging.basicConfig(handlers=[_handler], level=logging.INFO)
 
-API_TARGET_URL = "http://www.dropzonecommander.com:3001/ships/"
+API_TARGET_URL = "https://www.dropzonecommander.com:3001/ships/"
 LOCAL_MIRROR_PATH = os.path.join(os.getcwd(), "data", "ships.sqlite3")
 
 
@@ -54,16 +54,15 @@ def create_db(db_path):
                 icons           text
             )''')
             conn.commit()
-            print(success)
-    return success
+        return success
 
 
 def request_update(api_url):
 
     """Requests the updated set of ships from DZC.com and returns them as a giant ass nested dict."""
 
-    with requests.get(api_url, stream=True) as r:
-        ships = json.loads(r.raw)
+    with requests.get(api_url, stream=True, verify=False) as r:
+        ships = json.loads(r.text)
     
     for ship in ships:
         ship['Weapons'] = pickle.dumps(ship['Weapons'])
@@ -103,7 +102,7 @@ def update_db(ships_obj,db_path):
                 :MaxBroadSides,
                 :icons
             )''', ship)
-            conn.commit()
+        conn.commit()
 
 
 def main(api_url,ship_db):
