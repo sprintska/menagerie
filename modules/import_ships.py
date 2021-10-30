@@ -23,8 +23,8 @@ def create_db(db_path):
     """Create the db at the path if it doesn't exist"""
 
     if not os.path.exists(db_path):
-        with open(db_path, "w") as foo:
-            logging.info(f"Created ships db at {db_path}.")
+        open(db_path, "w").close()
+        logging.info(f"Created ships db at {db_path}.")
 
         with closing(sqlite3.connect(db_path)) as conn:
             success = conn.execute('''CREATE TABLE dropfleet_ships (
