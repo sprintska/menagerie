@@ -18,7 +18,7 @@ API_TARGET_URL = "http://www.dropzonecommander.com:3001/ships/"
 LOCAL_MIRROR_PATH = os.path.join(os.getcwd(), "data", "ships.sqlite3")
 
 
-def create_db(db_path=g_db_path):
+def create_db(db_path):
 
     """Create the db at the path if it doesn't exist"""
 
