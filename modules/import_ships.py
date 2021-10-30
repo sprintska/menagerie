@@ -65,7 +65,8 @@ def request_update(api_url):
         ships = json.loads(r.text)
     
     for ship in ships:
-        ship['Weapons'] = pickle.dumps(ship['Weapons'])
+        for keyword in ['Weapons','Special','LaunchAssets','SpecRules','icons']:
+            ship[keyword] = pickle.dumps(ship[keyword])
 
     return ships
 
